@@ -614,11 +614,20 @@ ylabel('Buoy Daily Average Temperatures (^oC)')
 xlabel('NOAA Temperatures (^oC)')
 title("Buoy Data Averaged at 0.5^oC Bins and Daily NOAA Temperatures vs Twin Otter Temperatures from Fall 2023")
 
+%% Robust Stats
+
+% RMSD using mean
+n = 12; % Number of elements
+rmsd = sqrt(sum((avg(1,1:12) - matrix(1,1:12)).^2) / n) % 0.1451 (about 2 degrees off from the 1-1 line)
+rmsd_med = sqrt(sum((med(1,1:12) - matrix(1,1:12)).^2) / n) % 0.1774
 %% Bias
 
 bias_buoy_avg = avg - matrix;
 bias_buoy_med = med - matrix;
 q=0;
+
+bias_avg_avg = mean(bias_buoy_avg(1,1:12))
+bias_med_avg = mean(bias_buoy_med(1,1:12))
 
 figure(9)
 scatter(matrix, bias_buoy_med,'k','filled','o','LineWidth',2)
@@ -631,7 +640,7 @@ ylabel('Buoy Bias (^oC)')
 xlabel('Temperature (^oC)')
 legend('Median', "Mean",Location="best")
 
-sum = sum(histo);
+sum_histo = sum(histo);
 
 %% Fix lons
 
@@ -659,3 +668,35 @@ clim([-2 15])
 xlabel('Longitude')
 ylabel('Latitude')
 title('All Buoy Tracks with Temperatures')
+
+%% Buoy - NOAA plot
+
+difference = both(2,:) - both(1,:); % buoy - noaa
+
+accuracy_avg = nanmean(difference); % 2.7505
+
+coords(1,1:5) = lonmn1(1,1:5);
+coords(1,6:61) = lonmn2(1,1:56);
+coords(1,62:118) = lonmn3(1,1:57);
+coords(1,119:164) = lonmn4(1,1:46);
+
+coords(2,1:5) = latmn1(1,1:5);
+coords(2,6:61) = latmn2(1,1:56);
+coords(2,62:118) = latmn3(1,1:57);
+coords(2,119:164) = latmn4(1,1:46);
+
+
+%% Accuracy on map
+
+figure(22)
+plot(coastline(:,1),coastline(:,2),'k-','linewidth',2)
+colormap(redblue)
+xlim([-180 -140]);
+ylim([60 75]);
+hold on
+scatter(coords(1,:), coords(2,:), 100, difference, 'filled', 'MarkerEdgeColor',lightGray); % 100 is the marker size
+c = colorbar; % To show the temperature scale
+clim([-6 6])
+xlabel('Longitude')
+ylabel('Latitude')
+title('Difference Between Buoy Data and NOAA Data')

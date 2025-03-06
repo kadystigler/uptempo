@@ -653,7 +653,7 @@ xtickangle(45);
 grid on
 ylabel('Amount of Data Points in Each Bin')
 
-sum = sum(histo);
+sum_histo = sum(histo);
 
 %% Median bins
 
@@ -693,15 +693,18 @@ title("Buoy Data Averaged at 0.5^oC Bins and Daily NOAA Temperatures vs Twin Ott
 %% Robust Stats
 
 % RMSD using mean
-n = length(avg); % Number of elements
-%rmsd = sqrt(sum(((avg - matrix).^2), 'omitnan')/ n); % 0.3918 (about 0.4 degrees off from the 1-1 line)
-%rmsd_med = sqrt(sum(((med - matrix).^2),'omitnan') / n); % 0.4165
+n = 11; % Number of elements
+rmsd = sqrt(sum(((avg(1, 1:11) - matrix(1, 1:11)).^2), 'omitnan')/ n) % 0.4259 (about 0.4 degrees off from the 1-1 line)
+rmsd_med = sqrt(sum(((med(1, 1:11) - matrix(1, 1:11)).^2),'omitnan') / n) % 0.4528
 
 %% Bias
 
 bias_buoy_avg = avg - matrix;
 bias_buoy_med = med - matrix;
 q=0;
+
+bias_avg_avg = mean(bias_buoy_avg(1, 1:11)) % 0.3365
+bias_med_avg = mean(bias_buoy_med(1, 1:11)) % 0.3705
 
 figure(9)
 scatter(matrix, bias_buoy_med,'k','filled','o','LineWidth',2)
@@ -740,3 +743,35 @@ clim([-2 15])
 xlabel('Longitude')
 ylabel('Latitude')
 title('All Buoy Tracks with Temperatures')
+
+%% Buoy - NOAA plot
+
+difference = both(2,:) - both(1,:); % buoy - noaa
+
+accuracy_avg = nanmean(difference); % 
+
+coords(1,1:53) = lonmn1(1,1:53);
+coords(1,54:106) = lonmn2(1,1:53);
+coords(1,107:159) = lonmn3(1,1:53);
+coords(1,160:212) = lonmn4(1,1:53);
+
+coords(2,1:53) = latmn1(1,1:53);
+coords(2,54:106) = latmn2(1,1:53);
+coords(2,107:159) = latmn3(1,1:53);
+coords(2,160:212) = latmn4(1,1:53);
+
+
+%% Accuracy on map
+
+figure(22)
+plot(coastline(:,1),coastline(:,2),'k-','linewidth',2)
+colormap(redblue)
+xlim([-180 -140]);
+ylim([60 75]);
+hold on
+scatter(coords(1,:), coords(2,:), 100, difference, 'filled', 'MarkerEdgeColor',lightGray); % 100 is the marker size
+c = colorbar; % To show the temperature scale
+clim([-6 6])
+xlabel('Longitude')
+ylabel('Latitude')
+title('Difference Between Buoy Data and NOAA Data')

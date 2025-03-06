@@ -1118,7 +1118,7 @@ xtickangle(45);
 grid on
 ylabel('Amount of Data Points in Each Bin')
 
-sum = sum(histo);
+sum_histo = sum(histo);
 
 %% median instead of mean
 
@@ -1243,14 +1243,17 @@ title("Median/Mean Buoy Data at 0.5^oC Bins and Daily NOAA Temperatures vs Twin 
 
 % RMSD using mean
 n = length(avg); % Number of elements
-%rmsd = sqrt(sum((avg - matrix).^2) / n); %0.8960 (about a degree off from the 1-1 line)
-%rmsd_med = sqrt(sum((med - matrix).^2) / n); %1.0110
+rmsd = sqrt(sum((avg - matrix).^2) / n) %0.8960 
+rmsd_med = sqrt(sum((med - matrix).^2) / n) %1.0110
 
 %% Bias
 
 bias_buoy_avg = avg - matrix;
 bias_buoy_med = med - matrix;
 q=0;
+
+bias_avg_avg = mean(bias_buoy_avg) % 0.5245
+bias_med_avg = mean(bias_buoy_med) % 0.6614
 
 figure(14)
 scatter(matrix, bias_buoy_med,'k','filled','o','LineWidth',2)
@@ -1411,7 +1414,7 @@ c = colorbar; % To show the temperature scale
 clim([-6 6])
 xlabel('Longitude')
 ylabel('Latitude')
-title('Difference Between Buoy Data and NOAA Data on the Same Days')
+title('Difference Between Buoy Data and NOAA Data')
 
 %% accuracy vs buoy temps
 

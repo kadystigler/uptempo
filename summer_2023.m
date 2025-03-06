@@ -453,16 +453,18 @@ avg(1,11) = mean(both(2, range12));
 avg(1,12) = mean(both(2, range13));
 avg(1,13) = mean(both(2, range14));
 avg(1,14) = mean(both(2, range15));
-avg(1,15) = nanmean(both(2, range16));
-avg(1,16) = nanmean(both(2, range17));
-avg(1,17) = nanmean(both(2, range18));
-avg(1,18) = mean(both(2, range19));
-avg(1,19) = mean(both(2, range20));
+%avg(1,15) = nanmean(both(2, range16));
+%avg(1,16) = nanmean(both(2, range17));
+%avg(1,17) = nanmean(both(2, range18));
+avg(1,15) = mean(both(2, range19));
+avg(1,16) = mean(both(2, range20));
 
 %% Overall plot with bin averaged
 
 lightGray = [0.7, 0.7, 0.7];
-matrix = -1.25:0.5:8;
+matrix = -1.25:0.5:5.5;
+matrix(1,15) = 7.25;
+matrix(1,16) = 7.75;
 
 figure(6)
 scatter(both(1,:), both(2,:), 30, lightGray,'filled','o')
@@ -489,7 +491,7 @@ xtickangle(45);
 grid on
 ylabel('Amount of Data Points in Each Bin')
 
-sum = sum(histo);
+sum_histo = sum(histo);
 
 %% Median bins
 
@@ -507,11 +509,11 @@ med(1,11) = median(both(2, range12));
 med(1,12) = median(both(2, range13));
 med(1,13) = median(both(2, range14));
 med(1,14) = median(both(2, range15));
-med(1,15) = median(both(2, range16));
-med(1,16) = median(both(2, range17));
-med(1,17) = median(both(2, range18));
-med(1,18) = median(both(2, range19));
-med(1,19) = median(both(2, range20));
+%med(1,15) = median(both(2, range16));
+%med(1,16) = median(both(2, range17));
+%med(1,17) = median(both(2, range18));
+med(1,15) = median(both(2, range19));
+med(1,16) = median(both(2, range20));
 
 %% Overall Plot w/ Median and Mean
 
@@ -533,9 +535,9 @@ title("Buoy Data Averaged at 0.5^oC Bins and Daily NOAA Temperatures vs Twin Ott
 %% Robust Stats
 
 % RMSD using mean
-n = length(avg); % Number of elements
-%rmsd = sqrt(sum(((avg - matrix).^2), 'omitnan')/ n); % 2.3690 (about 2 degrees off from the 1-1 line)
-%rmsd_med = sqrt(sum(((med - matrix).^2),'omitnan') / n); % 2.2374
+n = 16; % Number of elements
+rmsd = sqrt(sum((avg - matrix).^2) / n) % 2.5816 (about 2 degrees off from the 1-1 line)
+rmsd_med = sqrt(sum((med - matrix).^2) / n) % 2.4381
 
 %% Bias
 
@@ -552,6 +554,9 @@ yline(q, 'LineWidth',2)
 ylabel('Buoy Bias (^oC)')
 xlabel('Temperature (^oC)')
 legend('Median', "Mean",Location="best")
+
+bias_avg_avg = mean(bias_buoy_avg)
+bias_med_avg = mean(bias_buoy_med)
 
 %% Fix lons
 
@@ -645,3 +650,35 @@ clim([-2 15])
 xlabel('Longitude')
 ylabel('Latitude')
 title('All Buoy Tracks from June 2023 with Temperatures')
+
+%% Buoy - NOAA plot
+
+difference = both(2,:) - both(1,:); % buoy - noaa
+
+accuracy_avg = nanmean(difference); % 2.7505
+
+coords(1,1:35) = lonmn1(1,1:35);
+coords(1,36:53) = lonmn2(1,1:18);
+coords(1,54:70) = lonmn3(1,1:17);
+coords(1,71:104) = lonmn4(1,1:34);
+
+coords(2,1:35) = latmn1(1,1:35);
+coords(2,36:53) = latmn2(1,1:18);
+coords(2,54:70) = latmn3(1,1:17);
+coords(2,71:104) = latmn4(1,1:34);
+
+
+%% Accuracy on map
+
+figure(22)
+plot(coastline(:,1),coastline(:,2),'k-','linewidth',2)
+colormap(redblue)
+xlim([-180 -150]);
+ylim([60 75]);
+hold on
+scatter(coords(1,:), coords(2,:), 100, difference, 'filled', 'MarkerEdgeColor',lightGray); % 100 is the marker size
+c = colorbar; % To show the temperature scale
+clim([-6 6])
+xlabel('Longitude')
+ylabel('Latitude')
+title('Difference Between Buoy Data and NOAA Data')
